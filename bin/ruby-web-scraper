@@ -4,3 +4,5 @@ require 'pry'
 require_relative '../lib/main.rb'
 
 Runner = Main.new()
+
+Runner.start

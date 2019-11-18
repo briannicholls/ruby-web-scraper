@@ -4,53 +4,54 @@ require 'pry'
 
 class Main
 
-def initialize # initialize, ask user for subreddit name, display info
-  @authors = {}
-  @page
-  @num = 25
-  @subreddit
-  set_subreddit
-  build_authors_array
-  display_authors
-end
-
-def get_authors_from_page # returns array of authors on @page
-  authors = @page.body.to_s.split("author\":\"")
-  authors = authors.map{ |a|
-    a[0..a.index(",") - 2]
-  }
-  authors.shift
-  authors
-end
-
-def set_subreddit #### DOESN'T ALWAYS GET PAGE - INVESTIGATE
-  puts "Enter subreddit name:"
+#URL = "http://reddit.com/r/joerogan.json"
+def initialize
+  puts "Enter subreddit name: "
   @subreddit = gets.strip
-  @page = HTTParty.get("http://reddit.com/r/#{@subreddit}")
-  puts "page : : #{@page.class}"
+  @page
+  @authors = []
 end
 
-def display_authors # prints all authors on first 9 pages
-  puts "Authors on first 9 pages of subreddit:"
-  @authors.each{ |a,v|
-    puts "#{a} :: #{v}"
-  }
-end
-
-def increment_page
-  suffix = "?count=#{@num}"
-  @num += 25
-  @page = HTTParty.get("http://reddit.com/r/#{@subreddit}/#{suffix}")
-end
-
-def build_authors_array
-  page = 1
-  until page == 10
-      @authors["PAGE #{page}"] = get_authors_from_page
-      increment_page
-      page += 1
+def set_page(suffix = "")
+  @page = HTTParty.get("http://reddit.com/r/#{@subreddit}/.json#{suffix}")
+  if !@page.success?
+    set_page
+  else
+    puts "response code: #{@page.code}"
   end
 end
 
+def add_authors_current_page
+  posts = @page["data"]["children"] # Array of Hashes with each post's data
+  posts.each{ |post|
+    @authors.push(post['data']['author'])
+  }
+end
+
+def get_id_last_post
+  posts = @page['data']['children']
+  last_id = posts.last['data']['id'] # append to URL suffix to get next batch
+  last_id
+end
+
+def increment_page
+  last_id = get_id_last_post
+  set_page("?limit=100&after=t3_#{last_id}")
+end
+
+def print_authors
+  @authors.each{ |a|
+    puts "#{a}"
+  }
+end
+
+def start
+  set_page
+  add_authors_current_page
+  increment_page
+  add_authors_current_page
+
+  print_authors
+end
 
 end
