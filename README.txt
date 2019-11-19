@@ -5,4 +5,4 @@ first 127 posts on that subreddit (as long as the posts are not quarantined or
 otherwise made unavailable somehow... seems to not get all posts on more
 controversial subreddits)
 
-Appends a timestamp with the author list to /bin/logs/author_record.txt
+Records are saved in /bin/logs in subreddit's associated folder 
