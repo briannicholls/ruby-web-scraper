@@ -53,9 +53,14 @@ def start # main method
 end
 
 def save_to_file # adds timestamp and saves @authors to file
-  open("./bin/logs/author_record.txt", "a") do |f|
-    f.puts Time.now
-    f.puts "SUBREDDIT: /r/#{@page["data"]["children"][0]["data"]["subreddit"]}"
+  filename = "#{@subreddit} - #{Time.now}.txt"
+  # if folder doesn't exist for subreddit, create it
+  if !File.directory?("./bin/logs/#{@subreddit}")
+    Dir.mkdir("./bin/logs/#{@subreddit}")
+  end
+  File.open("./bin/logs/#{@subreddit}/#{filename}", "w+") do |f|
+    #f.puts Time.now
+    #f.puts "SUBREDDIT: /r/#{@page["data"]["children"][0]["data"]["subreddit"]}"
     f.puts @authors
   end
 end
